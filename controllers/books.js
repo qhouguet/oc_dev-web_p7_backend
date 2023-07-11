@@ -103,3 +103,49 @@ exports.getBooks = (req, res, next) => {
     .then((books) => res.status(200).json(books))
     .catch((error) => res.status(400).json({ error }));
 };
+
+exports.getBestrating = (req, res, next) => {
+  // On vient utiliser la méthode sort avec la clé que l'on veut sort
+  // + "-1" pour spécifier que c'est par ordre décroissant
+  // On utilise la méthode limit avec "3" pour ne garder que 3 résultats
+  Book.find()
+    .sort({ averageRating: -1 })
+    .limit(3)
+    .then((books) => res.status(200).json(books))
+    .catch((error) => res.status(400).json({ error }));
+};
+
+exports.createRating = (req, res, next) => {
+  Book.findOne({ _id: req.params.id })
+    .then((book) => {
+      const hasAlreadyVoted = book.ratings.find(
+        (rating) => rating.userId === req.auth.userId
+      );
+
+      if (!hasAlreadyVoted) {
+        book.ratings.push({ userId: req.auth.userId, grade: req.body.rating });
+
+        const ratings = book.ratings.map((rating) => rating.grade);
+        let averageRating =
+          ratings.reduce((previous, current) => {
+            return previous + current;
+          }, 0) / ratings.length;
+        averageRating = averageRating.toFixed(1);
+
+        Book.findByIdAndUpdate(
+          { _id: req.params.id },
+          { ratings: book.ratings, averageRating: averageRating },
+          { new: true }
+        )
+          .then((book) => res.status(200).json(book))
+          .catch((error) => res.status(401).json({ error }));
+      } else {
+        return res
+          .status(400)
+          .json({ message: "Vous avez déjà noté ce livre." });
+      }
+    })
+    .catch((error) => {
+      return res.status(500).json({ error });
+    });
+};
