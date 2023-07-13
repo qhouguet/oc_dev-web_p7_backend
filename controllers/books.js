@@ -33,7 +33,7 @@ exports.modifyBook = (req, res, next) => {
 			if (book.userId != req.auth.userId) {
 				res.status(403).json({ message: 'Not authorized' });
 			} else {
-				if (req.file) {
+				if (req.file && typeof bookObject.year === 'number') {
 					const filename = book.imageUrl.split('/images/')[1];
 					fs.unlink(`images/${filename}`, err => {
 						if (err) console.log(err);
