@@ -16,9 +16,11 @@ Pour cela, j'ai eu à ma disposition :
 
 Créez un fichier .env à la racine et copiez / collez y ceci :
 
+```.env
 DB_NAME=test
 DB_PASS=test
 TOKEN=RANDOM_TOKEN_SECRET
+```
 
 Pensez à installer **nodemon**
 
